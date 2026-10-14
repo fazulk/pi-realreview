@@ -1,0 +1,52 @@
+{
+  "name": "pi-realreview",
+  "version": "0.1.0",
+  "description": "Multi-model code review for pi: independent reviewers, an adjudicating synthesizer that removes false positives, and an HTML report",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "code-review",
+    "ai-review",
+    "llm"
+  ],
+  "license": "MIT",
+  "author": "Jeff Fasulkey <fazulk@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fazulk/pi-realreview.git"
+  },
+  "homepage": "https://github.com/fazulk/pi-realreview#readme",
+  "bugs": {
+    "url": "https://github.com/fazulk/pi-realreview/issues"
+  },
+  "type": "module",
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "pi": {
+    "extensions": [
+      "./src/index.ts"
+    ]
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.ts\" \"*.{json,md}\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"*.{json,md}\"",
+    "prepublishOnly": "npm run check && npm run format:check"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*"
+  },
+  "devDependencies": {
+    "@earendil-works/pi-ai": "^1.2.0",
+    "@earendil-works/pi-coding-agent": "^1.2.0",
+    "@earendil-works/pi-tui": "^1.2.0",
+    "@types/node": "^26.1.1",
+    "prettier": "^3.9.5",
+    "typescript": "^7.0.2"
+  }
+}

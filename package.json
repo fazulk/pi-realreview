@@ -1,6 +1,6 @@
 {
   "name": "pi-realreview",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Multi-model code review for pi: independent reviewers, an adjudicating synthesizer that removes false positives, and an HTML report",
   "keywords": [
     "pi-package",

@@ -124,7 +124,7 @@ const SELECTION_SCRIPT = `(function () {
   }
 
   function toMarkdown() {
-    var lines = ["## Selected review items (" + data.repo + " · " + data.scope + ")", ""];
+    var lines = ["# Resolve the following issues", ""];
     picked().forEach(function (row, index) {
       var item = data.rows[Number(row.dataset.rec)];
       var note = row.querySelector("textarea").value.trim();

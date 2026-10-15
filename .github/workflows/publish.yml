@@ -38,6 +38,12 @@ jobs:
       - name: Bump from the published version and publish
         run: |
           set -euo pipefail
+          # setup-node writes a placeholder NODE_AUTH_TOKEN. Remove it so npm
+          # uses the trusted-publishing identity instead of that placeholder.
+          unset NODE_AUTH_TOKEN
+          if [ -n "${NPM_CONFIG_USERCONFIG:-}" ] && [ -f "$NPM_CONFIG_USERCONFIG" ]; then
+            sed -i '/_authToken=/d' "$NPM_CONFIG_USERCONFIG"
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 

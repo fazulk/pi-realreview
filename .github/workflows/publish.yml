@@ -1,0 +1,63 @@
+name: Publish
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - package.json
+      - package-lock.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'fazulk/pi-realreview'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: Use an npm that can publish with trusted publishing
+        run: npm install -g npm@^11.5.1
+
+      - run: npm ci
+
+      - name: Bump from the published version and publish
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # package.json can lag behind npm when a publish landed and the version
+          # commit did not. Start from the registry so the next patch is new.
+          published=$(npm view pi-realreview version)
+          npm version "$published" --no-git-tag-version --allow-same-version --force
+          npm version patch --no-git-tag-version --force
+          version=$(node -p "require('./package.json').version")
+
+          git add package.json package-lock.json
+          git commit -m "chore: release v${version} [skip ci]"
+          git tag "v${version}"
+
+          npm publish --provenance --access public
+
+          if ! git push origin HEAD:main; then
+            git fetch origin main
+            git rebase origin/main
+            git tag -f "v${version}"
+            git push origin HEAD:main
+          fi
+          git push origin "refs/tags/v${version}" --force

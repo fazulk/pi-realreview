@@ -63,6 +63,8 @@ summary { cursor:pointer; font-weight:600; }
 .banner { padding:12px 16px; margin:0 0 18px; border:1px solid #efdfbf; background:#fbf2e2; color:var(--warn); border-radius:8px; font-size:13px; }
 footer { border-top:1px solid var(--line); margin-top:22px; padding-top:18px; font-size:12px; color:var(--muted); }
 th.pick,td.pick { width:34px; padding-right:0; }
+th.id,td.id { width:1%; white-space:nowrap; font-weight:700; }
+td.id .muted { font-weight:500; }
 td.pick input { width:16px; height:16px; margin:3px 0 0; cursor:pointer; accent-color:var(--accent); }
 tr.picked td { background:#f6f8fc; }
 textarea.note { display:block; width:100%; min-height:54px; margin-top:8px; padding:6px 8px; font:inherit; font-size:12.5px; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:6px; resize:vertical; }
@@ -82,7 +84,7 @@ body.has-tray .shell { padding-bottom:110px; }
 @media print { body{background:#fff} nav,.tray,.pick,textarea.note:disabled{display:none} .layout{display:block} .section{border:0;padding:10px 0} .finding{break-inside:avoid} }
 `;
 
-/** Collects checked reconciliation rows (with notes) and copies them as Markdown. Data comes from #rr-data. */
+/** Collects checked reconciliation rows and copies them as Markdown: the candidate, its finding when one exists, and any note. Data comes from #rr-data. */
 const SELECTION_SCRIPT = `(function () {
   var data = JSON.parse(document.getElementById("rr-data").textContent);
   var tray = document.getElementById("rr-tray");
@@ -115,16 +117,36 @@ const SELECTION_SCRIPT = `(function () {
     return text.trim().split("\\n").join("\\n   ");
   }
 
+  function pushBlock(lines, text) {
+    text.trim().split("\\n").forEach(function (line) {
+      lines.push(line ? "   " + line : "");
+    });
+  }
+
   function toMarkdown() {
     var lines = ["## Selected review items (" + data.repo + " · " + data.scope + ")", ""];
     picked().forEach(function (row, index) {
       var item = data.rows[Number(row.dataset.rec)];
       var note = row.querySelector("textarea").value.trim();
+      var finding = item.finding;
       lines.push((index + 1) + ". **" + item.candidate + "** — " + item.decision + " (raised by " + item.raisedBy + ")");
       lines.push("   Reasoning: " + indent(item.reasoning));
-      if (note) lines.push("   Note: " + indent(note));
+      if (finding) {
+        lines.push("");
+        lines.push("   **" + finding.id + " [" + finding.severity + "]** " + finding.title);
+        if (finding.location) lines.push("   **Where:** " + indent(finding.location));
+        if (finding.body && finding.body.trim()) {
+          lines.push("");
+          pushBlock(lines, finding.body);
+        }
+      }
+      if (note) {
+        lines.push("");
+        lines.push("   **Note:** " + indent(note));
+      }
+      lines.push("");
     });
-    return lines.join("\\n") + "\\n";
+    return lines.join("\\n").replace(/\\n+$/, "") + "\\n";
   }
 
   function fallbackCopy(text) {
@@ -356,6 +378,9 @@ function reconciliationSection(report: ReportData, reviewers: ReportMeta["review
       const raisedByHtml = raisedBy
         .map(part => ("reviewer" in part ? '<a href="#' + notesId(part.reviewer) + '">' + escapeHtml(part.text) + "</a>" : renderInline(part.text)))
         .join("");
+      const findingId = finding
+        ? '<a href="#' + escapeHtml(finding) + '" title="Jump to ' + escapeHtml(finding) + '">' + escapeHtml(finding) + "</a>"
+        : '<span class="muted">—</span>';
       return (
         '<tr id="' +
         recId(index) +
@@ -371,7 +396,9 @@ function reconciliationSection(report: ReportData, reviewers: ReportMeta["review
         decisionClass(row.decision) +
         '">' +
         escapeHtml(row.decision) +
-        "</span></td><td>" +
+        '</span></td><td class="id">' +
+        findingId +
+        "</td><td>" +
         renderInline(row.reasoning) +
         '<textarea class="note" disabled placeholder="Check the row to add a note" aria-label="Note for ' +
         escapeHtml(row.candidate) +
@@ -380,7 +407,7 @@ function reconciliationSection(report: ReportData, reviewers: ReportMeta["review
     })
     .join("");
   return (
-    '<div class="table-wrap"><table><thead><tr><th class="pick"></th><th>Candidate</th><th>Raised by</th><th>Decision</th><th>Reasoning</th></tr></thead><tbody>' +
+    '<div class="table-wrap"><table><thead><tr><th class="pick"></th><th>Candidate</th><th>Raised by</th><th>Decision</th><th class="id">ID</th><th>Reasoning</th></tr></thead><tbody>' +
     rows +
     "</tbody></table></div>"
   );
@@ -389,10 +416,22 @@ function reconciliationSection(report: ReportData, reviewers: ReportMeta["review
 /** The fixed tray, the row data it copies, and the script that wires them up. Empty when nothing can be selected. */
 function selectionTray(meta: ReportMeta, report: ReportData | undefined) {
   if (!report || report.reconciliation.length === 0) return "";
+  const findingIds = new Set(report.findings.map(finding => finding.id));
+  const findingsById = new Map(report.findings.map(finding => [finding.id, finding]));
   const data = {
     repo: meta.repo,
     scope: meta.scopeLabel,
-    rows: report.reconciliation,
+    rows: report.reconciliation.map(row => {
+      const id = rowFinding(row, findingIds);
+      const finding = id ? findingsById.get(id) : undefined;
+      return {
+        candidate: row.candidate,
+        raisedBy: row.raisedBy,
+        decision: row.decision,
+        reasoning: row.reasoning,
+        finding: finding ? { id: finding.id, severity: finding.severity, title: finding.title, location: finding.location, body: finding.body } : null,
+      };
+    }),
   };
   // Escaping "<" keeps "</script>" inside a string from closing the tag.
   const json = JSON.stringify(data).replace(/</g, "\\u003c");

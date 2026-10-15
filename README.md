@@ -14,6 +14,28 @@ Or from GitHub:
 pi install git:github.com/fazulk/pi-realreview
 ```
 
+## Screenshots
+
+These screens use the extension's UI with demo data. Findings, timings, and costs are illustrative.
+
+**1. Choose what to review.** Start with a branch comparison, uncommitted changes, a commit, or custom instructions.
+
+![Onboarding step 1: selecting a review scope](https://raw.githubusercontent.com/fazulk/pi-realreview/main/docs/screenshots/onboarding-scope.png)
+
+**2. Pick your models.** Filter the available models, select a reviewer, then choose its effort level. Add as many reviewers as you need.
+
+![Onboarding model picker showing models from Anthropic, OpenAI, and Google](https://raw.githubusercontent.com/fazulk/pi-realreview/main/docs/screenshots/onboarding-model-picker.png)
+
+**3. Watch the synthesis.** Here, three independent reviewers have finished and the synthesizer is checking their findings against the code.
+
+![Three completed reviewers and an active synthesizer, with elapsed time, tool calls, and model costs](https://raw.githubusercontent.com/fazulk/pi-realreview/main/docs/screenshots/synthesis.png)
+
+**4. Read the report.** Findings link back to the reconciliation table, where you can see what was retained, merged, rejected, or left unproven.
+
+![Example HTML review report with a verdict, review statistics, and actionable findings](https://raw.githubusercontent.com/fazulk/pi-realreview/main/docs/screenshots/review-report.png)
+
+Download the [example HTML report](https://github.com/fazulk/pi-realreview/raw/refs/heads/main/docs/example-review.html) and open it in your browser to explore the reconciliation table, original reviewer notes, and Markdown export.
+
 ## Usage
 
 Run `/realreview` (or `/rr`) inside a git repository. Setup walks you through these steps:

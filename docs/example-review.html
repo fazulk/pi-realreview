@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Code review · feat/workspace-cache against main</title><style>:root { --ink:#172330; --muted:#657386; --paper:#fff; --bg:#f3f5f7; --line:#dde3e9; --accent:#2452a1; --danger:#ac3c2f; --warn:#9a691e; --ok:#2f7a4f; }
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; scroll-padding-top:28px; }
+body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+a { color:var(--accent); text-underline-offset:3px; }
+.shell { max-width:1280px; margin:auto; padding:48px 40px 64px; }
+.eyebrow { color:var(--accent); font-size:11px; font-weight:750; letter-spacing:.13em; text-transform:uppercase; }
+h1 { margin:8px 0; font-size:clamp(26px,4vw,38px); line-height:1.15; letter-spacing:-.03em; }
+.subtitle { margin:10px 0 24px; color:var(--muted); overflow-wrap:anywhere; }
+.verdict-tag { display:inline-block; padding:3px 10px; border-radius:6px; font-size:12px; font-weight:700; margin-right:8px; }
+.verdict-tag.approve { background:#e3f3ea; color:var(--ok); }
+.verdict-tag.request_changes { background:#fbe9e6; color:var(--danger); }
+.verdict-tag.comment { background:#eaf0fa; color:var(--accent); }
+.stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:20px 0 28px; }
+.stat { padding:15px 18px; background:var(--paper); border:1px solid var(--line); border-radius:10px; }
+.stat strong { display:block; font-size:22px; line-height:1.3; letter-spacing:-.02em; }
+.stat span { font-size:12px; color:var(--muted); }
+.layout { display:grid; grid-template-columns:200px minmax(0,1fr); gap:28px; align-items:start; }
+nav { position:sticky; top:26px; }
+nav a { display:block; padding:7px 10px; font-size:12px; color:var(--muted); text-decoration:none; border-left:2px solid transparent; }
+nav a:hover { border-left-color:var(--accent); background:#e9eef6; color:var(--accent); }
+main { min-width:0; }
+.section { background:var(--paper); border:1px solid var(--line); border-radius:12px; margin:0 0 18px; padding:26px 30px; }
+.section > h2 { margin:0 0 16px; font-size:21px; letter-spacing:-.02em; }
+h3 { font-size:17px; line-height:1.45; margin:0 0 10px; }
+h4,h5,h6 { margin:18px 0 6px; font-size:14px; }
+p { margin:10px 0; }
+ul,ol { padding-left:22px; }
+li { margin:5px 0; }
+li.l1 { margin-left:18px; } li.l2 { margin-left:36px; } li.l3 { margin-left:54px; }
+code { font:.85em ui-monospace,SFMono-Regular,Consolas,monospace; background:#f0f3f6; border:1px solid #e7ebf0; padding:.1em .3em; border-radius:4px; overflow-wrap:anywhere; }
+pre { padding:16px; overflow:auto; background:#f4f6f8; border:1px solid var(--line); border-radius:7px; }
+pre code { border:0; background:none; padding:0; }
+blockquote { margin:14px 0; padding:2px 16px; border-left:3px solid var(--accent); background:#f6f8fc; color:#41526b; }
+.finding { border-top:1px solid var(--line); padding:22px 0 4px; margin-top:20px; }
+.finding:first-of-type { border-top:0; padding-top:0; margin-top:0; }
+.loc { margin:4px 0 10px; font-size:13px; color:var(--muted); }
+.badge { display:inline-block; font-size:11px; font-weight:750; letter-spacing:.04em; padding:3px 7px; margin-right:8px; border-radius:5px; vertical-align:2px; border:1px solid; }
+.badge.P1 { background:#fbe9e6; color:var(--danger); border-color:#f2d4ce; }
+.badge.P2 { background:#fbf2e2; color:var(--warn); border-color:#efdfbf; }
+.badge.P3 { background:#eaf0fa; color:var(--accent); border-color:#d4dff1; }
+.fid { color:var(--muted); font-weight:600; margin-right:6px; }
+.pill { display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; }
+.pill.retained,.pill.done { background:#e3f3ea; color:var(--ok); }
+.pill.merged { background:#eaf0fa; color:var(--accent); }
+.pill.rejected,.pill.failed { background:#fbe9e6; color:var(--danger); }
+.pill.unproven { background:#fbf2e2; color:var(--warn); }
+.table-wrap { overflow-x:auto; }
+table { border-collapse:collapse; width:100%; font-size:12.5px; line-height:1.6; }
+th { background:#f4f6f8; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.03em; text-align:left; }
+td,th { padding:11px 12px; vertical-align:top; border-bottom:1px solid var(--line); }
+.muted { color:var(--muted); font-size:13px; }
+details { margin:12px 0; padding:12px 16px; border:1px solid var(--line); border-radius:8px; }
+summary { cursor:pointer; font-weight:600; }
+.notes { margin-top:14px; font-size:13px; }
+.back { float:right; font-size:12px; font-weight:500; text-decoration:none; }
+@keyframes rr-flash { from { background:#fff1bf; } to { background:transparent; } }
+.finding:target, details:target, tr:target > td { animation:rr-flash 1.8s ease-out; }
+.banner { padding:12px 16px; margin:0 0 18px; border:1px solid #efdfbf; background:#fbf2e2; color:var(--warn); border-radius:8px; font-size:13px; }
+footer { border-top:1px solid var(--line); margin-top:22px; padding-top:18px; font-size:12px; color:var(--muted); }
+th.pick,td.pick { width:34px; padding-right:0; }
+th.id,td.id { width:1%; white-space:nowrap; font-weight:700; }
+td.id .muted { font-weight:500; }
+td.pick input { width:16px; height:16px; margin:3px 0 0; cursor:pointer; accent-color:var(--accent); }
+tr.picked td { background:#f6f8fc; }
+textarea.note { display:block; width:100%; min-height:54px; margin-top:8px; padding:6px 8px; font:inherit; font-size:12.5px; color:var(--ink); background:var(--paper); border:1px solid var(--line); border-radius:6px; resize:vertical; }
+textarea.note:focus { outline:2px solid #c9d7ef; border-color:var(--accent); }
+textarea.note:disabled { background:#f7f8fa; color:var(--muted); cursor:not-allowed; }
+body.has-tray .shell { padding-bottom:110px; }
+.tray { position:fixed; left:50%; bottom:16px; z-index:10; transform:translateX(-50%); width:min(1200px,calc(100% - 32px)); display:flex; align-items:center; gap:14px; padding:10px 12px 10px 16px; background:var(--ink); color:#fff; border-radius:10px; box-shadow:0 10px 28px rgba(23,35,48,.28); font-size:13px; }
+.tray-count { font-weight:700; white-space:nowrap; }
+.tray-list { flex:1; min-width:0; display:flex; gap:6px; overflow-x:auto; }
+.tray-list:empty::before { content:"Check reconciliation rows to collect them"; color:rgba(255,255,255,.6); }
+.tray-list a { max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:2px 9px; font-size:12px; color:#fff; text-decoration:none; background:rgba(255,255,255,.13); border-radius:999px; }
+.tray-list a:hover { background:rgba(255,255,255,.24); }
+.tray-status { color:#9fd8b5; white-space:nowrap; }
+.tray button { padding:7px 14px; font:inherit; font-weight:700; color:var(--ink); background:#fff; border:0; border-radius:7px; cursor:pointer; white-space:nowrap; }
+.tray button:disabled { opacity:.45; cursor:default; }
+@media (max-width:900px) { .shell{padding:26px 18px} .layout{display:block} nav{position:static;display:flex;flex-wrap:wrap;margin-bottom:16px} .stats{grid-template-columns:repeat(2,1fr)} .section{padding:22px 20px} }
+@media print { body{background:#fff} nav,.tray,.pick,textarea.note:disabled{display:none} .layout{display:block} .section{border:0;padding:10px 0} .finding{break-inside:avoid} }
+</style></head><body class="has-tray"><div class="shell"><header>
+<div class="eyebrow">realreview</div><h1>feat/workspace-cache against main</h1>
+<p class="subtitle">example/document-app · illustrative demo · 2026-10-14 12:00 UTC</p>
+<div class="stats">
+<div class="stat"><strong>2 findings</strong><span>1 P1 · 1 P2</span></div>
+<div class="stat"><strong>3 / 3</strong><span>reviewers finished</span></div>
+<div class="stat"><strong>$1.31</strong><span>total model cost</span></div>
+<div class="stat"><strong>3m 16s</strong><span>wall time</span></div>
+</div></header>
+<div class="layout"><nav><a href="#verdict">Verdict</a><a href="#findings">Findings</a><a href="#reconciliation">Reconciliation</a><a href="#validation">Validation</a><a href="#limitations">Limitations</a><a href="#reviewers">Reviewers</a></nav><main>
+<section class="section" id="verdict"><h2>Verdict</h2><p><span class="verdict-tag request_changes">Request changes</span>Two actionable findings remain after checking five candidates against the code. The cache key can mix results between workspaces, and a rejected request stays cached.</p></section>
+<section class="section" id="findings"><h2>Findings</h2><article class="finding" id="R1"><h3><a class="back" href="#rec-1">↩ Reconciliation</a><span class="badge P1">P1</span><span class="fid">R1</span>Include the workspace in the cache key</h3><p class="loc">src/cache.ts:42–48</p><p>The cache is keyed only by <code>documentId</code>, although document IDs are unique within a workspace. After switching workspaces, a request for the same ID can return the previous workspace’s document.</p>
+<p>Key entries by both <code>workspaceId</code> and <code>documentId</code>, and add a regression case with matching IDs in two workspaces.</p></article><article class="finding" id="R2"><h3><a class="back" href="#rec-3">↩ Reconciliation</a><span class="badge P2">P2</span><span class="fid">R2</span>Evict rejected promises so requests can retry</h3><p class="loc">src/cache.ts:63–71</p><p>The pending promise is stored before the request completes. If the request rejects, that rejected promise remains in the cache and every later attempt fails immediately.</p>
+<p>Remove the entry on rejection, then verify that a second request succeeds after a transient failure.</p></article></section>
+<section class="section" id="reconciliation"><h2>Reconciliation</h2><div class="table-wrap"><table><thead><tr><th class="pick"></th><th>Candidate</th><th>Raised by</th><th>Decision</th><th class="id">ID</th><th>Reasoning</th></tr></thead><tbody><tr id="rec-1" data-rec="0"><td class="pick"><input type="checkbox" aria-label="Select A1: Workspace is missing from the cache key → R1"></td><td><a href="#R1" title="Jump to R1">A1: Workspace is missing from the cache key → R1</a></td><td><a href="#notes-1">opus 4-6 high</a></td><td><span class="pill retained">Retained as R1</span></td><td class="id"><a href="#R1" title="Jump to R1">R1</a></td><td>Confirmed: the key uses documentId alone; the same ID can occur in two workspaces.<textarea class="note" disabled placeholder="Check the row to add a note" aria-label="Note for A1: Workspace is missing from the cache key → R1"></textarea></td></tr><tr id="rec-2" data-rec="1"><td class="pick"><input type="checkbox" aria-label="Select B1: Cross-workspace stale document → R1"></td><td><a href="#R1" title="Jump to R1">B1: Cross-workspace stale document → R1</a></td><td><a href="#notes-2">gpt 5.4 high</a></td><td><span class="pill merged">Merged into R1</span></td><td class="id"><a href="#R1" title="Jump to R1">R1</a></td><td>Same cause and fix as A1. Kept one finding with the workspace-switch reproduction.<textarea class="note" disabled placeholder="Check the row to add a note" aria-label="Note for B1: Cross-workspace stale document → R1"></textarea></td></tr><tr id="rec-3" data-rec="2"><td class="pick"><input type="checkbox" aria-label="Select C1: Failed requests cannot be retried → R2"></td><td><a href="#R2" title="Jump to R2">C1: Failed requests cannot be retried → R2</a></td><td><a href="#notes-3">gemini 3.1-pro-preview high</a></td><td><span class="pill retained">Retained as R2</span></td><td class="id"><a href="#R2" title="Jump to R2">R2</a></td><td>Confirmed: the rejection path never deletes the cached promise.<textarea class="note" disabled placeholder="Check the row to add a note" aria-label="Note for C1: Failed requests cannot be retried → R2"></textarea></td></tr><tr id="rec-4" data-rec="3"><td class="pick"><input type="checkbox" aria-label="Select B2: Empty IDs can create cache entries"></td><td><a href="#notes-2" title="Jump to gpt 5.4 high's notes">B2: Empty IDs can create cache entries</a></td><td><a href="#notes-2">gpt 5.4 high</a></td><td><span class="pill rejected">Rejected</span></td><td class="id"><span class="muted">—</span></td><td>The caller validates documentId before reaching this code.<textarea class="note" disabled placeholder="Check the row to add a note" aria-label="Note for B2: Empty IDs can create cache entries"></textarea></td></tr><tr id="rec-5" data-rec="4"><td class="pick"><input type="checkbox" aria-label="Select C2: Cache entries could grow without bound"></td><td><a href="#notes-3" title="Jump to gemini 3.1-pro-preview high's notes">C2: Cache entries could grow without bound</a></td><td><a href="#notes-3">gemini 3.1-pro-preview high</a></td><td><span class="pill unproven">Unproven</span></td><td class="id"><span class="muted">—</span></td><td>The cache has an existing LRU limit. No demonstrated unbounded growth in the reviewed path.<textarea class="note" disabled placeholder="Check the row to add a note" aria-label="Note for C2: Cache entries could grow without bound"></textarea></td></tr></tbody></table></div></section>
+<section class="section" id="validation"><h2>Validation</h2><ul><li>Illustrative example only: no repository was reviewed and no model calls were made.</li><li>A real report lists the code inspection and checks performed by the reviewers and synthesizer.</li></ul></section>
+<section class="section" id="limitations"><h2>Limitations</h2><ul><li>All findings, file paths, timings, model selections, and costs in this report are demo data.</li><li>Model availability and actual cost depend on your configured providers.</li></ul></section>
+<section class="section" id="reviewers"><h2>Reviewers</h2><div class="table-wrap"><table><thead><tr><th>Reviewer</th><th>Model</th><th>Effort</th><th>Status</th><th>Tool calls</th><th>Time</th><th>Cost</th></tr></thead><tbody><tr><td>opus 4-6 high</td><td><code>claude-opus-4-6</code></td><td>high</td><td><span class="pill done">done</span></td><td>24</td><td>1m 9s</td><td>$0.420</td></tr><tr><td>gpt 5.4 high</td><td><code>gpt-5.4</code></td><td>high</td><td><span class="pill done">done</span></td><td>31</td><td>1m 31s</td><td>$0.360</td></tr><tr><td>gemini 3.1-pro-preview high</td><td><code>gemini-3.1-pro-preview</code></td><td>high</td><td><span class="pill done">done</span></td><td>19</td><td>1m 22s</td><td>$0.180</td></tr></tbody></table></div><p class="muted">Synthesis: <code>claude-opus-4-6</code> (high), $0.340. Formatter: <code>claude-haiku-4-5</code>, $0.010.</p><p class="muted">The original notes are unfiltered. They are superseded by the adjudicated findings above.</p><details id="notes-1"><summary>opus 4-6 high · original notes</summary><div class="notes"><h6>A1: Workspace is missing from the cache key</h6>
+<p><code>src/cache.ts:42–48</code></p>
+<p>The cache uses documentId without workspaceId. Switch from workspace A to B with the same document ID to reproduce a stale result.</p></div></details><details id="notes-2"><summary>gpt 5.4 high · original notes</summary><div class="notes"><h6>B1: Cross-workspace stale document</h6>
+<p><code>src/cache.ts:42–48</code></p>
+<p>The cache key does not include the active workspace.</p>
+<h6>B2: Empty IDs can create cache entries</h6>
+<p>Check whether the caller rejects empty IDs before cache lookup.</p></div></details><details id="notes-3"><summary>gemini 3.1-pro-preview high · original notes</summary><div class="notes"><h6>C1: Failed requests cannot be retried</h6>
+<p><code>src/cache.ts:63–71</code></p>
+<p>A rejected promise remains cached. Evict it so a later request can retry.</p>
+<h6>C2: Cache entries could grow without bound</h6>
+<p>Check whether the existing cache implementation enforces an entry limit.</p></div></details></section>
+</main></div><footer>
+<p>Review only. The working tree was not changed.</p>
+
+</footer></div><div class="tray" id="rr-tray" role="region" aria-label="Selected reconciliation items"><span class="tray-count"></span><div class="tray-list"></div><span class="tray-status" aria-live="polite"></span><button type="button">Copy selected</button></div><script type="application/json" id="rr-data">{"repo":"example/document-app · illustrative demo","scope":"feat/workspace-cache against main","rows":[{"candidate":"A1: Workspace is missing from the cache key → R1","raisedBy":"opus 4-6 high","decision":"Retained as R1","reasoning":"Confirmed: the key uses documentId alone; the same ID can occur in two workspaces.","finding":{"id":"R1","severity":"P1","title":"Include the workspace in the cache key","location":"src/cache.ts:42–48","body":"The cache is keyed only by `documentId`, although document IDs are unique within a workspace. After switching workspaces, a request for the same ID can return the previous workspace’s document.\n\nKey entries by both `workspaceId` and `documentId`, and add a regression case with matching IDs in two workspaces."}},{"candidate":"B1: Cross-workspace stale document → R1","raisedBy":"gpt 5.4 high","decision":"Merged into R1","reasoning":"Same cause and fix as A1. Kept one finding with the workspace-switch reproduction.","finding":{"id":"R1","severity":"P1","title":"Include the workspace in the cache key","location":"src/cache.ts:42–48","body":"The cache is keyed only by `documentId`, although document IDs are unique within a workspace. After switching workspaces, a request for the same ID can return the previous workspace’s document.\n\nKey entries by both `workspaceId` and `documentId`, and add a regression case with matching IDs in two workspaces."}},{"candidate":"C1: Failed requests cannot be retried → R2","raisedBy":"gemini 3.1-pro-preview high","decision":"Retained as R2","reasoning":"Confirmed: the rejection path never deletes the cached promise.","finding":{"id":"R2","severity":"P2","title":"Evict rejected promises so requests can retry","location":"src/cache.ts:63–71","body":"The pending promise is stored before the request completes. If the request rejects, that rejected promise remains in the cache and every later attempt fails immediately.\n\nRemove the entry on rejection, then verify that a second request succeeds after a transient failure."}},{"candidate":"B2: Empty IDs can create cache entries","raisedBy":"gpt 5.4 high","decision":"Rejected","reasoning":"The caller validates documentId before reaching this code.","finding":null},{"candidate":"C2: Cache entries could grow without bound","raisedBy":"gemini 3.1-pro-preview high","decision":"Unproven","reasoning":"The cache has an existing LRU limit. No demonstrated unbounded growth in the reviewed path.","finding":null}]}</script><script>(function () {
+  var data = JSON.parse(document.getElementById("rr-data").textContent);
+  var tray = document.getElementById("rr-tray");
+  var count = tray.querySelector(".tray-count");
+  var list = tray.querySelector(".tray-list");
+  var status = tray.querySelector(".tray-status");
+  var button = tray.querySelector("button");
+  var rows = Array.prototype.slice.call(document.querySelectorAll("tr[data-rec]"));
+  var statusTimer;
+
+  function picked() {
+    return rows.filter(function (row) { return row.querySelector("input").checked; });
+  }
+
+  function update() {
+    var selected = picked();
+    count.textContent = selected.length + " selected";
+    list.replaceChildren.apply(list, selected.map(function (row) {
+      var link = document.createElement("a");
+      var text = data.rows[Number(row.dataset.rec)].candidate.replace(/`/g, "");
+      link.href = "#" + row.id;
+      link.title = text;
+      link.textContent = text;
+      return link;
+    }));
+    button.disabled = selected.length === 0;
+  }
+
+  function indent(text) {
+    return text.trim().split("\n").join("\n   ");
+  }
+
+  function pushBlock(lines, text) {
+    text.trim().split("\n").forEach(function (line) {
+      lines.push(line ? "   " + line : "");
+    });
+  }
+
+  function toMarkdown() {
+    var lines = ["## Selected review items (" + data.repo + " · " + data.scope + ")", ""];
+    picked().forEach(function (row, index) {
+      var item = data.rows[Number(row.dataset.rec)];
+      var note = row.querySelector("textarea").value.trim();
+      var finding = item.finding;
+      lines.push((index + 1) + ". **" + item.candidate + "** — " + item.decision + " (raised by " + item.raisedBy + ")");
+      lines.push("   Reasoning: " + indent(item.reasoning));
+      if (finding) {
+        lines.push("");
+        lines.push("   **" + finding.id + " [" + finding.severity + "]** " + finding.title);
+        if (finding.location) lines.push("   **Where:** " + indent(finding.location));
+        if (finding.body && finding.body.trim()) {
+          lines.push("");
+          pushBlock(lines, finding.body);
+        }
+      }
+      if (note) {
+        lines.push("");
+        lines.push("   **Note:** " + indent(note));
+      }
+      lines.push("");
+    });
+    return lines.join("\n").replace(/\n+$/, "") + "\n";
+  }
+
+  function fallbackCopy(text) {
+    var area = document.createElement("textarea");
+    area.value = text;
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    var ok = document.execCommand("copy");
+    area.remove();
+    if (!ok) throw new Error("copy failed");
+  }
+
+  function flash(message) {
+    status.textContent = message;
+    clearTimeout(statusTimer);
+    statusTimer = setTimeout(function () { status.textContent = ""; }, 2000);
+  }
+
+  rows.forEach(function (row) {
+    var box = row.querySelector("input");
+    var note = row.querySelector("textarea");
+    box.addEventListener("change", function () {
+      note.disabled = !box.checked;
+      row.classList.toggle("picked", box.checked);
+      if (box.checked) note.focus();
+      update();
+    });
+  });
+
+  button.addEventListener("click", function () {
+    var text = toMarkdown();
+    var write = navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject(new Error("no clipboard"));
+    write
+      .catch(function () { fallbackCopy(text); })
+      .then(function () { flash("Copied " + picked().length); })
+      .catch(function () { flash("Copy failed"); });
+  });
+
+  update();
+})();</script><script>(function () {
+  function reveal(id) {
+    var target = id && document.getElementById(decodeURIComponent(id));
+    if (target && target.tagName === "DETAILS") target.open = true;
+  }
+  document.addEventListener("click", function (event) {
+    var link = event.target.closest && event.target.closest('a[href^="#"]');
+    if (link) reveal(link.getAttribute("href").slice(1));
+  });
+  reveal(location.hash.slice(1));
+})();</script></body></html>

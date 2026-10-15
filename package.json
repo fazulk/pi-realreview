@@ -22,13 +22,15 @@
   "type": "module",
   "files": [
     "src",
+    "docs",
     "README.md",
     "LICENSE"
   ],
   "pi": {
     "extensions": [
       "./src/index.ts"
-    ]
+    ],
+    "image": "https://raw.githubusercontent.com/fazulk/pi-realreview/main/docs/screenshots/synthesis.png"
   },
   "scripts": {
     "check": "tsc --noEmit",
